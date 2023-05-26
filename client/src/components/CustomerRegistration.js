@@ -4,9 +4,10 @@ import { Formik, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { redirect, useNavigate } from 'react-router';
+import { useNavigate } from 'react-router';
 
 const CustomerRegistrationForm = () => {
+  const [disableFields, setDisableFields] = useState(false);
   const initialValues = {
     customer_name: '',
     customer_email: '',
@@ -76,7 +77,11 @@ const CustomerRegistrationForm = () => {
       if (parseRes.token) {
         // alert("Registered successfully!");
         localStorage.setItem("token", parseRes.token);
-        toast.success("Registered Successfully");
+        toast.success("Registered Successfully", {
+          onClose: () =>{
+            navigate("/dashboard");
+          }
+        } );
         // setAuth(true);
       } else {
         toast.error(parseRes);
