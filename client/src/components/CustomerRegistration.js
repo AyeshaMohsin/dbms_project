@@ -1,7 +1,10 @@
-import React from 'react';
+import React, {useEffect, useState } from 'react';
 import { Container, Row, Col, Form, Button } from 'react-bootstrap';
 import { Formik, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { redirect, useNavigate } from 'react-router';
 
 const CustomerRegistrationForm = () => {
   const initialValues = {
@@ -20,14 +23,77 @@ const CustomerRegistrationForm = () => {
       .required('Required'),
   });
 
-  const handleSubmit = (values) => {
-    console.log('Form values:', values);
-    console.log(values.customer_name);
-    console.log(values.customer_email);
-    console.log(values.customer_password);
+
+  const checkAuthenticated = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/auth/is-verify", {
+        method: "GET",
+        headers: { token: localStorage.token }
+      });
+
+      const parseRes = await res.json();
+
+      parseRes === true ? setIsAuthenticated(true) : setIsAuthenticated(false);
+    } catch (err) {
+      console.error(err.message);
+    }
+  };
+
+  useEffect(() => {
+    checkAuthenticated();
+  }, []);
+
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const navigate = useNavigate();
+  
+  
+
+  const handleSubmit = async (values) => {
+
+    const customer_email = values.customer_email;
+    const customer_name = values.customer_name;
+    const customer_password = values.customer_password;
+
+    try {
+      const body = {
+        customer_name,
+        customer_email,
+        customer_password
+      };
+      
+      
+      const response = await fetch("http://localhost:5000/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json"
+        },
+        body: JSON.stringify(body)
+      });
+      
+      console.log("here!");
+      const parseRes = await response.json();
+      console.log(parseRes);
+      if (parseRes.token) {
+        // alert("Registered successfully!");
+        localStorage.setItem("token", parseRes.token);
+        toast.success("Registered Successfully");
+        // setAuth(true);
+      } else {
+        toast.error(parseRes);
+        // setAuth(false);
+      }
+    } catch (error) {
+      // Handle any errors
+    }
     // Add your CustomerRegistration logic here
   };
 
+  if(isAuthenticated){
+    toast.error("Logout first");
+  }
+ 
+  
+  
   return (
     <Container fluid className="d-flex align-items-center justify-content-center" style={{ height: '100vh' }}>
       <Row className="justify-content-center w-100">
@@ -38,8 +104,10 @@ const CustomerRegistrationForm = () => {
               initialValues={initialValues}
               validationSchema={validationSchema}
               onSubmit={handleSubmit}
-            >
+              >
               {(formik) => (
+                <fieldset disabled={isAuthenticated}>
+
                 <Form onSubmit={formik.handleSubmit}>
                   <Form.Group controlId="customer_name">
                     <Form.Label>Name:</Form.Label>
@@ -59,7 +127,7 @@ const CustomerRegistrationForm = () => {
                       name="customer_email"
                       placeholder="Enter your email"
                       className={`form-control ${formik.errors.customer_email && formik.touched.customer_email ? 'is-invalid' : ''}`}
-                    />
+                      />
                     <ErrorMessage name="customer_email" component="div" className="invalid-feedback" />
                   </Form.Group>
 
@@ -69,9 +137,8 @@ const CustomerRegistrationForm = () => {
                       type="password"
                       name="customer_password"
                       placeholder="Enter your password"
-                      className={`form-control ${
-                        formik.errors.customer_password && formik.touched.customer_password ? 'is-invalid' : ''
-                      }`}
+                      className={`form-control ${formik.errors.customer_password && formik.touched.customer_password ? 'is-invalid' : ''
+                    }`}
                     />
                     <ErrorMessage name="customer_password" component="div" className="invalid-feedback" />
                   </Form.Group>
@@ -82,9 +149,8 @@ const CustomerRegistrationForm = () => {
                       type="password"
                       name="customer_confirmPassword"
                       placeholder="Confirm your password"
-                      className={`form-control ${
-                        formik.errors.customer_confirmPassword && formik.touched.customer_confirmPassword ? 'is-invalid' : ''
-                      }`}
+                      className={`form-control ${formik.errors.customer_confirmPassword && formik.touched.customer_confirmPassword ? 'is-invalid' : ''
+                    }`}
                     />
                     <ErrorMessage name="customer_confirmPassword" component="div" className="invalid-feedback" />
                   </Form.Group>
@@ -93,11 +159,25 @@ const CustomerRegistrationForm = () => {
                     Register
                   </Button>
                 </Form>
+              </fieldset>
               )}
             </Formik>
           </div>
-        </Col>
-      </Row>
+          </Col>
+          </Row>
+          <ToastContainer
+        position="top-center"
+        autoClose={1000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        type="success"
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
     </Container>
   );
 };
