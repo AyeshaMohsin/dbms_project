@@ -8,7 +8,7 @@ app.use(cors());
 
 //routes//
 
-//register and login
+//CustomerRegistration and login
 app.use("/auth", require("./routes/auth"));
 
 
