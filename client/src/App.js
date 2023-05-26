@@ -4,15 +4,17 @@ import {
   RouterProvider,
   createBrowserRouter,
 } from "react-router-dom";
-
 import Login from "./components/Login";
-import Register from "./components/CustomerRegistration";
+import CustomerRegistration from "./components/CustomerRegistration";
 import Navbar from "./components/Navbar";
 import Dashboard from "./components/Dashboard";
 import Home from "./components/Home";
+
 import "./App.css"
+
+
 function App() {
-  const Lavout = () => {
+  const Layout = () => {
     return (
       <>
         <Navbar />
@@ -24,7 +26,7 @@ function App() {
   let router = createBrowserRouter([
     {
       path: "/",
-      element: <Lavout />,
+      element: <Layout />,
       children: [
         {
           path: "/",
@@ -35,8 +37,8 @@ function App() {
           element: <Login />,
         },
         {
-          path: "/register",
-          element: <Register />
+          path: "/CustomerRegistration",
+          element: <CustomerRegistration />
         },
         {
           path: "/dashboard",
