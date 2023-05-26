@@ -1,13 +1,44 @@
-import Button from 'react-bootstrap/Button';
-import Container from 'react-bootstrap/Container';
-import Form from 'react-bootstrap/Form';
-import Nav from 'react-bootstrap/Nav';
-import Navbar from 'react-bootstrap/Navbar';
-import NavDropdown from 'react-bootstrap/NavDropdown';
-import Offcanvas from 'react-bootstrap/Offcanvas';
-import {Link } from "react-router-dom"
+import React, { useEffect, useState } from 'react';
+import { Button, Container, Form, Nav, Navbar, NavDropdown, Offcanvas } from 'react-bootstrap';
+import { Link, useNavigate } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
 
 function OffcanvasExample() {
+  const navigate = useNavigate();
+
+  const checkAuthenticated = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/auth/is-verify", {
+        method: "GET",
+        headers: { token: localStorage.token }
+      });
+
+      const parseRes = await res.json();
+
+      parseRes === true ? setIsAuthenticated(true) : setIsAuthenticated(false);
+
+    } catch (err) {
+      console.error(err.message);
+    }
+  };
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+
+  useEffect(() => {
+    checkAuthenticated();
+  });
+
+  const handleLogout = () => {
+    if (isAuthenticated) {
+      localStorage.removeItem('token');
+      toast.success("Logout Successful '\n'", {
+        onClose: () => {
+          navigate("/");
+        }
+      })
+
+    }
+  };
   return (
     <>
       {['md'].map((expand) => (
@@ -28,8 +59,24 @@ function OffcanvasExample() {
               </Offcanvas.Header>
               <Offcanvas.Body>
                 <Nav className="justify-content-end flex-grow-1 pe-3">
-                  <Nav.Link href="/Register">Register</Nav.Link>
-                  <Nav.Link href="/Login">Login</Nav.Link>
+                  {
+                    isAuthenticated && (
+                      <>
+                        <Nav.Link onClick={handleLogout}>Logout</Nav.Link>
+                        <Nav.Link href="/Dashboard">Dashboard</Nav.Link>
+                      </>
+                    )
+                  }
+
+                  {
+                    !isAuthenticated && (
+                      <>
+                        <Nav.Link href="/CustomerRegistration">Register</Nav.Link>
+                        <Nav.Link href="/Login">Login</Nav.Link>
+                      </>
+                    )
+                  }
+
                   <NavDropdown
                     title="Dropdown"
                     id={`offcanvasNavbarDropdown-expand-${expand}`}
@@ -56,6 +103,19 @@ function OffcanvasExample() {
               </Offcanvas.Body>
             </Navbar.Offcanvas>
           </Container>
+          <ToastContainer
+            position="top-center"
+            autoClose={1000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            type="success"
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="dark"
+          />
         </Navbar>
       ))}
     </>
