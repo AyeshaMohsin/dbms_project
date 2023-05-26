@@ -16,6 +16,17 @@ create database dbmsproject
 \x ON
 -- for pretty printing output in cmd line
 
+-- view all tables in database
+SELECT table_name
+FROM information_schema.tables
+WHERE table_type = 'BASE TABLE'
+  AND table_schema = 'public'
+  -- table_catalog = {current database name in single quotes}
+  AND table_catalog = 'dbmsproject';
+
+
+
+-- DDL COMMANDS
 -- create composite address type
 create type address as (
     street_address varchar(255),
@@ -32,7 +43,7 @@ create table customer (
     customer_address address
 );
 
-
+-- seller table
 create table seller (
     seller_id uuid primary key default uuid_generate_v4(),
     seller_name varchar(255) not null,
@@ -41,11 +52,13 @@ create table seller (
     seller_isVerified boolean default false
 );
 
+-- contact info type
 create type contact_info as (
     email varchar(255),
     phone varchar(255)
 );
 
+-- store table
 create table store (
     store_id uuid primary key default uuid_generate_v4(),
     store_name varchar(255) not null,
@@ -56,7 +69,7 @@ create table store (
     foreign key(store_seller_id) references seller(seller_id)
 );
 
-
+-- generic medicine table
 create table generic_medicine(
     generic_medicine_id uuid primary key default uuid_generate_v4(),
     generic_medicine_name varchar(255) not null,
@@ -64,12 +77,14 @@ create table generic_medicine(
     generic_medicine_side_effects varchar(600)[]
 );
 
+-- manufacturer table
 create table manufacturer(
     manufacturer_id uuid primary key default uuid_generate_v4(),
     manufacturer_name varchar(400) not null,
     manufacturer_contact contact_info not null
 );
 
+-- brand medicine table
 create table brand_medicine(
     brand_medicine_id uuid primary key default uuid_generate_v4(),
     brand_medicine_name varchar(500) not null,
@@ -83,9 +98,5 @@ create table brand_medicine(
 );
 
 
--- view all tables in database
-SELECT table_name
-FROM information_schema.tables
-WHERE table_type = 'BASE TABLE'
-  AND table_schema = 'public'
-  AND table_catalog = 'dbmsproject';
+
+
