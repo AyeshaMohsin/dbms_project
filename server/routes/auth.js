@@ -16,7 +16,7 @@ router.post("/register", validInfo, async (req, res) => {
     );
 
     if (customer.rows.length !== 0) {
-      return res.status(401).send("Customer already exists");
+      return res.status(401).json("Customer already exists");
     }
 
     const saltRound = 10;
@@ -34,7 +34,7 @@ router.post("/register", validInfo, async (req, res) => {
     return res.json({ token });
   } catch (error) {
     console.error();
-    res.status(500).send("Server Error");
+    res.status(500).json("Server Error");
   }
 });
 
@@ -49,7 +49,7 @@ router.post("/login", validInfo, async (req, res) => {
     );
 
     if (customer.rows.length === 0) {
-      return res.status(401).send("Password or Email is incorrect");
+      return res.status(401).json("Password or Email is incorrect");
     }
 
     const validPassword = await bcrypt.compare(
@@ -58,7 +58,7 @@ router.post("/login", validInfo, async (req, res) => {
     );
 
     if (!validPassword) {
-      return res.status(401).send("Password or Email is incorrect");
+      return res.status(401).json("Password or Email is incorrect");
     }
 
     const token = jwtGenerator(customer.rows[0].customer_id);
@@ -72,7 +72,7 @@ router.get("/is-verify", authorize, async (req, res) => {
   try {
     res.json(true);
   } catch (error) {
-    res.status(500).send("Server Error");
+    res.status(500).json("Server Error");
   }
 });
 
